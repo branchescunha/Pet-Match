@@ -3,14 +3,14 @@ package com.example.petmatch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -42,22 +42,22 @@ fun TelaEscolhaPerfil(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(44.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .background(AmareloSuave, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "PetMatch",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = TextoPrimario
-                )
-            }
+            Text(
+                text = "🐾 PetMatch",
+                style = MaterialTheme.typography.headlineLarge,
+                color = TextoPrimario
+            )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = "Escolha como deseja usar o app",
+                color = TextoSecundario
+            )
+
+            Spacer(modifier = Modifier.height(36.dp))
 
             Text(
                 text = "Olá, $nomeUsuario",
@@ -76,16 +76,18 @@ fun TelaEscolhaPerfil(
             Spacer(modifier = Modifier.height(28.dp))
 
             CardPerfil(
+                icone = "🏠",
                 titulo = "Tutor",
-                subtitulo = "Deseja divulgar pets para adoção",
+                subtitulo = "Cadastre pets, acompanhe informações e ajude animais a encontrarem um novo lar.",
                 onClick = { onContinuarClick("Tutor") }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             CardPerfil(
+                icone = "❤️",
                 titulo = "Cliente",
-                subtitulo = "Deseja encontrar um pet para adotar",
+                subtitulo = "Explore pets disponíveis, favorite animais e encontre seu novo companheiro.",
                 onClick = { onContinuarClick("Cliente") }
             )
         }
@@ -94,6 +96,7 @@ fun TelaEscolhaPerfil(
 
 @Composable
 private fun CardPerfil(
+    icone: String,
     titulo: String,
     subtitulo: String,
     onClick: () -> Unit
@@ -102,34 +105,44 @@ private fun CardPerfil(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Branco),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp)
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(48.dp)
-                    .background(AmareloPrincipal, CircleShape)
-            )
+                    .size(58.dp)
+                    .background(AmareloSuave, CircleShape),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = icone,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.size(16.dp))
 
-            Text(
-                text = titulo,
-                style = MaterialTheme.typography.titleLarge,
-                color = TextoPrimario
-            )
+            Column {
+                Text(
+                    text = titulo,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = TextoPrimario
+                )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = subtitulo,
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextoSecundario
-            )
+                Text(
+                    text = subtitulo,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextoSecundario
+                )
+            }
         }
     }
 }

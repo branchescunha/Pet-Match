@@ -58,6 +58,7 @@ fun TelaCadastroPet(
     var idade by remember { mutableFloatStateOf(1f) }
     var pesoTexto by remember { mutableStateOf("") }
     var imagemSelecionada by remember { mutableStateOf<Int?>(null) }
+    var erro by remember { mutableStateOf("") }
 
     val imagensDisponiveis = if (tipo == "Gato") {
         listOf(R.drawable.cat1, R.drawable.cat2, R.drawable.cat3)
@@ -103,23 +104,38 @@ fun TelaCadastroPet(
                             color = if (imagemSelecionada == imagem) AmareloPrincipal else BordaSuave,
                             shape = RoundedCornerShape(16.dp)
                         )
-                        .clickable { imagemSelecionada = imagem }
+                        .clickable {
+                            imagemSelecionada = imagem
+                            erro = ""
+                        }
                         .padding(4.dp),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Fit
                 )
             }
         }
 
-        CampoForm("Nome do pet", nome) { nome = it }
+        CampoForm("Nome do pet", nome) {
+            nome = it
+            erro = ""
+        }
 
         Text("Tipo", color = TextoPrimario)
-        SeletorDuplo("Gato", "Cachorro", tipo) { tipo = it }
+        SeletorDuplo("Gato", "Cachorro", tipo) {
+            tipo = it
+            erro = ""
+        }
 
         Text("Sexo", color = TextoPrimario)
-        SeletorDuplo("Fêmea", "Macho", sexo) { sexo = it }
+        SeletorDuplo("Fêmea", "Macho", sexo) {
+            sexo = it
+            erro = ""
+        }
 
         Text("Porte", color = TextoPrimario)
-        SeletorTriplo("Pequeno", "Médio", "Grande", porte) { porte = it }
+        SeletorTriplo("Pequeno", "Médio", "Grande", porte) {
+            porte = it
+            erro = ""
+        }
 
         CampoForm(
             label = "Peso (kg)",
@@ -127,12 +143,16 @@ fun TelaCadastroPet(
             onValueChange = {
                 val filtrado = it.filter { c -> c.isDigit() || c == ',' || c == '.' }
                 pesoTexto = filtrado
+                erro = ""
             }
         )
 
-        CampoForm("Localização (opcional)", localizacao) { localizacao = it }
+        CampoForm("Localização (opcional)", localizacao) {
+            localizacao = it
+        }
 
         Text("Idade aproximada: ${idade.toInt()} anos", color = TextoPrimario)
+
         Slider(
             value = idade,
             onValueChange = { idade = it },
@@ -157,37 +177,74 @@ fun TelaCadastroPet(
             )
         }
 
-        CampoForm("Descrição (opcional)", descricao) { descricao = it }
+        CampoForm("Descrição (opcional)", descricao) {
+            descricao = it
+        }
+
+        if (erro.isNotBlank()) {
+            Text(
+                text = erro,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         BotaoPadrao(
             texto = "Salvar",
             onClick = {
-                if (nome.isBlank() || imagemSelecionada == null) return@BotaoPadrao
+                val pesoConvertido = pesoTexto.replace(",", ".").toFloatOrNull()
 
-                val pesoConvertido = pesoTexto.replace(",", ".").toFloatOrNull() ?: 0f
+                when {
+                    nome.isBlank() -> {
+                        erro = "Informe o nome do pet."
+                    }
 
-                val saude = buildString {
-                    append(if (vacinado) "Vacinado" else "Não informado")
-                    if (castrado) append(" e castrado")
+                    imagemSelecionada == null -> {
+                        erro = "Selecione uma foto para o pet."
+                    }
+
+                    pesoTexto.isBlank() || pesoConvertido == null || pesoConvertido <= 0f -> {
+                        erro = "Informe um peso válido para o pet."
+                    }
+
+                    else -> {
+                        val saude = buildString {
+                            append(if (vacinado) "Vacinado" else "Não informado")
+                            if (castrado) append(" e castrado")
+                        }
+
+                        val novoPet = Pet(
+                            nome = nome,
+                            tipo = tipo,
+                            idade = idade.toInt(),
+                            sexo = sexo,
+                            peso = pesoConvertido,
+                            porte = porte,
+                            descricao = if (descricao.isBlank()) "Sem descrição informada." else descricao,
+                            saude = saude,
+                            localizacao = if (localizacao.isBlank()) "Localização não informada" else localizacao,
+                            tutor = nomeTutor,
+                            imagem = imagemSelecionada!!
+                        )
+
+                        onSalvarPet(novoPet)
+
+                        nome = ""
+                        tipo = "Gato"
+                        sexo = "Fêmea"
+                        porte = "Pequeno"
+                        descricao = ""
+                        localizacao = ""
+                        vacinado = false
+                        castrado = false
+                        idade = 1f
+                        pesoTexto = ""
+                        imagemSelecionada = R.drawable.cat1
+                        erro = ""
+                    }
                 }
-
-                val novoPet = Pet(
-                    nome = nome,
-                    tipo = tipo,
-                    idade = idade.toInt(),
-                    sexo = sexo,
-                    peso = pesoConvertido,
-                    porte = porte,
-                    descricao = if (descricao.isBlank()) "Sem descrição informada." else descricao,
-                    saude = saude,
-                    localizacao = if (localizacao.isBlank()) "Localização não informada" else localizacao,
-                    tutor = nomeTutor,
-                    imagem = imagemSelecionada!!
-                )
-
-                onSalvarPet(novoPet)
             }
         )
 

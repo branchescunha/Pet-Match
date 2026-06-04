@@ -12,16 +12,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,8 +45,36 @@ fun TelaDetalhesPet(
     perfilUsuario: String,
     estaFavoritado: Boolean,
     onFavoritarClick: (Pet) -> Unit,
+    onAbrirMapaClick: (Pet) -> Unit,
     onVoltar: () -> Unit
 ) {
+    var mostrarDialogLogin by remember { mutableStateOf(false) }
+
+    if (mostrarDialogLogin) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogLogin = false },
+            title = { Text("Entre para continuar") },
+            text = { Text("Para favoritar este pet, você precisa entrar ou criar uma conta no PetMatch.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogLogin = false
+                        onFavoritarClick(pet)
+                    }
+                ) {
+                    Text("Entrar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { mostrarDialogLogin = false }
+                ) {
+                    Text("Agora não")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,10 +83,10 @@ fun TelaDetalhesPet(
         horizontalAlignment = Alignment.Start
     ) {
         Card(
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = Branco),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            modifier = Modifier.fillMaxWidth()
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -60,9 +94,9 @@ fun TelaDetalhesPet(
                         painter = painterResource(id = pet.imagem),
                         contentDescription = pet.nome,
                         modifier = Modifier
-                            .size(110.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(20.dp)),
+                        contentScale = ContentScale.Fit
                     )
 
                     Spacer(modifier = Modifier.size(16.dp))
@@ -73,11 +107,14 @@ fun TelaDetalhesPet(
                             style = MaterialTheme.typography.headlineSmall,
                             color = TextoPrimario
                         )
+
                         Spacer(modifier = Modifier.height(4.dp))
+
                         Text(
                             text = "${pet.tipo} • ${pet.porte}",
                             color = TextoSecundario
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
 
                         FilterChip(
@@ -98,7 +135,9 @@ fun TelaDetalhesPet(
                     style = MaterialTheme.typography.titleMedium,
                     color = TextoPrimario
                 )
+
                 Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
                     text = pet.descricao,
                     color = TextoSecundario
@@ -110,18 +149,93 @@ fun TelaDetalhesPet(
                 InfoLinha("Sexo", pet.sexo)
                 InfoLinha("Peso", "${pet.peso} kg")
                 InfoLinha("Porte", pet.porte)
-                InfoLinha("Saúde", pet.saude)
-                InfoLinha("Localização", pet.localizacao)
-                InfoLinha("Tutor", pet.tutor)
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = AmareloSuave),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Condição de saúde",
+                            color = TextoSecundario
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = pet.saude,
+                            color = TextoPrimario
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Localização",
+                            color = TextoSecundario
+                        )
+
+                        Text(
+                            text = pet.localizacao,
+                            color = TextoPrimario
+                        )
+                    }
+
+                    BotaoMapaPequeno(
+                        onClick = { onAbrirMapaClick(pet) }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = AmareloSuave),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Tutor responsável",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = TextoSecundario
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = pet.tutor,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = TextoPrimario
+                        )
+                    }
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (perfilUsuario == "Cliente") {
+        if (perfilUsuario == "Cliente" || perfilUsuario == "Visitante") {
             BotaoPadrao(
                 texto = if (estaFavoritado) "Remover dos favoritos" else "Adicionar aos favoritos",
-                onClick = { onFavoritarClick(pet) }
+                onClick = {
+                    if (perfilUsuario == "Visitante") {
+                        mostrarDialogLogin = true
+                    } else {
+                        onFavoritarClick(pet)
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -131,6 +245,18 @@ fun TelaDetalhesPet(
             texto = "Voltar",
             onClick = onVoltar
         )
+    }
+}
+
+@Composable
+private fun BotaoMapaPequeno(
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp)
+    ) {
+        Text("Ver mapa")
     }
 }
 
@@ -149,6 +275,7 @@ private fun InfoLinha(
             text = titulo,
             color = TextoSecundario
         )
+
         Text(
             text = valor,
             color = TextoPrimario,

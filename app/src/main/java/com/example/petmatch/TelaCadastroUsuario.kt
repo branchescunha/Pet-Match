@@ -1,7 +1,6 @@
 package com.example.petmatch
 
 import android.util.Patterns
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,14 +31,15 @@ import com.example.petmatch.ui.theme.TextoPrimario
 import com.example.petmatch.ui.theme.TextoSecundario
 
 @Composable
-fun TelaLogin(
-    onEntrarClick: (String, String) -> Unit,
-    onCriarContaClick: () -> Unit,
-    mensagemErro: String
+fun TelaCadastroUsuario(
+    onCriarContaClick: (String, String, String) -> Unit,
+    onVoltarClick: () -> Unit
 ) {
+    var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
-    var erroLocal by remember { mutableStateOf("") }
+    var confirmarSenha by remember { mutableStateOf("") }
+    var erro by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -62,14 +62,14 @@ fun TelaLogin(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "Entre para continuar",
+                text = "Crie sua conta para continuar",
                 color = TextoSecundario
             )
 
             Spacer(modifier = Modifier.height(36.dp))
 
             Text(
-                text = "Entrar",
+                text = "Criar conta",
                 style = MaterialTheme.typography.headlineMedium,
                 color = TextoPrimario
             )
@@ -77,78 +77,98 @@ fun TelaLogin(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Acesse sua conta para favoritar pets e interagir no app.",
+                text = "Cadastre seus dados para acessar o PetMatch.",
                 color = TextoSecundario
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            CampoPadrao(
+            CampoCadastro(
+                value = nome,
+                onValueChange = {
+                    nome = it
+                    erro = ""
+                },
+                label = "Nome completo"
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            CampoCadastro(
                 value = email,
                 onValueChange = {
                     email = it
-                    erroLocal = ""
+                    erro = ""
                 },
-                label = "Seu email",
+                label = "E-mail",
                 keyboardType = KeyboardType.Email
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            CampoPadrao(
+            CampoCadastro(
                 value = senha,
                 onValueChange = {
                     senha = it
-                    erroLocal = ""
+                    erro = ""
                 },
                 label = "Senha",
                 isPassword = true
             )
 
-            val mensagemFinal = erroLocal.ifBlank { mensagemErro }
+            Spacer(modifier = Modifier.height(12.dp))
 
-            if (mensagemFinal.isNotBlank()) {
+            CampoCadastro(
+                value = confirmarSenha,
+                onValueChange = {
+                    confirmarSenha = it
+                    erro = ""
+                },
+                label = "Confirmar senha",
+                isPassword = true
+            )
+
+            if (erro.isNotBlank()) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = mensagemFinal,
-                    color = if (erroLocal.isNotBlank()) MaterialTheme.colorScheme.error else TextoSecundario
+                    text = erro,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
 
         Column {
             BotaoPadrao(
-                texto = "Entrar",
+                texto = "Criar conta",
                 onClick = {
-                    erroLocal = when {
-                        email.isBlank() -> "Informe seu email."
-                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Informe um email válido."
-                        senha.isBlank() -> "Informe sua senha."
+                    erro = when {
+                        nome.isBlank() -> "Informe seu nome."
+                        email.isBlank() -> "Informe seu e-mail."
+                        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Informe um e-mail válido."
+                        senha.length < 4 -> "A senha precisa ter pelo menos 4 caracteres."
+                        senha != confirmarSenha -> "As senhas não são iguais."
                         else -> ""
                     }
 
-                    if (erroLocal.isBlank()) {
-                        onEntrarClick(email, senha)
+                    if (erro.isBlank()) {
+                        onCriarContaClick(nome, email, senha)
                     }
                 }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = "Não tem conta? Criar conta!",
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .clickable { onCriarContaClick() },
-                color = TextoSecundario
+            BotaoSecundario(
+                texto = "Voltar para login",
+                onClick = onVoltarClick
             )
         }
     }
 }
 
 @Composable
-private fun CampoPadrao(
+private fun CampoCadastro(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
